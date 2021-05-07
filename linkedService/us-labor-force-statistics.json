@@ -1,0 +1,10 @@
+{
+	"name": "us-labor-force-statistics",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"sasUri": "https://azureopendatastorage.blob.core.windows.net/laborstatisticscontainer/lfs/?\"\""
+		}
+	}
+}
