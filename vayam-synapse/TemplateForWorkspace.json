@@ -1,0 +1,379 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "vayam-synapse"
+		},
+		"DansDell_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'DansDell'"
+		},
+		"vayam-synapse-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'vayam-synapse-WorkspaceDefaultSqlServer'"
+		},
+		"DansDell_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "C:\\Users\\DanSchreck\\OneDrive - Vayam LLC\\_EnterpriseAnalytics\\HCM_Dashboard"
+		},
+		"DansDell_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "dan@vayam-llc.com"
+		},
+		"us-labor-force-statistics_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'us-labor-force-statistics'"
+		},
+		"vayam-synapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://vayam.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/DansDell')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('DansDell_properties_typeProperties_host')]",
+					"userId": "[parameters('DansDell_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('DansDell_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PowerBIWorkspace1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "PowerBIWorkspace",
+				"typeProperties": {
+					"workspaceID": "0a1c9abf-31fb-4e75-9643-f890ad284314",
+					"tenantID": "4ef99062-bb32-4c7d-acc4-77eb947a41ea"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/us-labor-force-statistics')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('us-labor-force-statistics_sasUri')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/vayam-synapse-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('vayam-synapse-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/vayam-synapse-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('vayam-synapse-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/IntegrationRuntime1')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/IntegrationRuntime2')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Query data with SQL')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "/*\nFull tutorial available on: https://docs.microsoft.com/en-us/azure/synapse-analytics/sql/tutorial-data-analyst\nIn this tutorial, you learn how to perform exploratory data analysis by combining different Azure Open Datasets\nusing serverless SQL pool and then visualizing the results in Azure Synapse Studio.\n\nIn particular, you analyze the New York City (NYC) Taxi dataset that includes:\n\n - Pickup and drop-off dates and times.\n - Pick up and drop-off locations.\n - Trip distances.\n - Itemized fares.\n - Rate types.\n - Payment types.\n - Driver-reported passenger counts.*/\n\n\n/*\n * * * * * * * * * * * * * * * *\n * Automatic schema inference  *\n * * * * * * * * * * * * * * * *\n\nSince data is stored in the Parquet file format, automatic schema inference is available.\nYou can easily query the data without listing the data types of all columns in the files.\nYou also can use the virtual column mechanism and the filepath function to filter out a certain subset of files.\n\nLet's first get familiar with the NYC Taxi data by running the following query. */\n\nSELECT TOP 100 * FROM\n    OPENROWSET(\n        BULK 'https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=2019/puMonth=*/*.parquet',\n        FORMAT='PARQUET'\n    ) AS [nyc];\n\n\n/* Similarly, you can query the Public Holidays dataset by using the following query. */\n\nSELECT TOP 100 * FROM\n    OPENROWSET(\n        BULK 'https://azureopendatastorage.blob.core.windows.net/holidaydatacontainer/Processed/*.parquet',\n        FORMAT='PARQUET'\n    ) AS [holidays];\n\n/* Lastly, you can also query the Weather Data dataset by using the following query. */\n\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://azureopendatastorage.blob.core.windows.net/isdweatherdatacontainer/ISDWeather/year=2018/month=*/*.parquet',\n        FORMAT='PARQUET'\n    ) AS [weather];\n\n/* You can learn more about the meaning of the individual columns in the descriptions\nof the NYC Taxi, Public Holidays, and Weather Data datasets on the Azure Opendatasets page. */\n\n\n/*\n * * * * * * * * * * * * * * * * * * * * * * * * * *\n * Time series, seasonality, and outlier analysis  *\n * * * * * * * * * * * * * * * * * * * * * * * * * *\nYou can easily summarize the yearly number of taxi rides by using the following query. */\n\nSELECT\n    YEAR(tpepPickupDateTime) AS current_year,\n    COUNT(*) AS rides_per_year\nFROM\n    OPENROWSET(\n        BULK 'https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=*/puMonth=*/*.parquet',\n        FORMAT='PARQUET'\n    ) AS [nyc]\nWHERE nyc.filepath(1) >= '2014' AND nyc.filepath(1) <= '2019'\nGROUP BY YEAR(tpepPickupDateTime)\nORDER BY 1 ASC;\n\n/* The data can be visualized in Synapse Studio by switching from the Table to the Chart view.\nYou can choose among different chart types, such as Area, Bar, Column, Line, Pie, and Scatter.\nIn this case, plot the Column chart with the Category column set to current_year.\n\nFrom this visualization, a trend of a decreasing number of rides over years can be clearly seen.\nPresumably, this decrease is due to the recent increased popularity of ride-sharing companies.\n*/\n\n\n/* For full tutorial click on \"?\" in top right corner then Knowledge center/Browse Available Samples/SQL Scripts/Analyze Azure Open Datasets using serverless SQL pool*/\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"poolName": "Built-in",
+						"databaseName": "master"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Python Demo')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "demo",
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SparkDemoPool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 1,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "1",
+						"spark.dynamicAllocation.maxExecutors": "1"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1",
+						"state": {}
+					},
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "python"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/db352c9e-f06b-4d11-9ee0-89aea41768d4/resourceGroups/VayamPeople/providers/Microsoft.Synapse/workspaces/vayam-synapse/bigDataPools/SparkDemoPool",
+						"name": "SparkDemoPool",
+						"type": "Spark",
+						"endpoint": "https://vayam-synapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkDemoPool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "2.4",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"# Azure Synapse Analytics Python Demo\r\n",
+							"## Data source: Public Holidays Open Dataset"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": true
+						},
+						"source": [
+							"from azureml.opendatasets import PublicHolidays\r\n",
+							"from datetime import datetime\r\n",
+							"from dateutil import parser\r\n",
+							"from dateutil.relativedelta import relativedelta"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": true
+						},
+						"source": [
+							"end_date = datetime.today()\r\n",
+							"start_date = end_date - relativedelta(months=12)\r\n",
+							"holidays = PublicHolidays(start_date=start_date, \r\n",
+							"end_date=end_date)"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": true
+						},
+						"source": [
+							"holidays_df = holidays.to_spark_dataframe()\r\n",
+							"holidays_df.count()"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": true
+						},
+						"source": [
+							"holidays_df.limit(20).show()"
+						],
+						"outputs": [],
+						"execution_count": 5
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": false
+						},
+						"source": [
+							"display(holidays_df.limit(5))"
+						],
+						"outputs": [],
+						"execution_count": 8
+					}
+				]
+			},
+			"dependsOn": []
+		}
+	]
+}

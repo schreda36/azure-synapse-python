@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "vayam-synapse"
+		},
+		"DansDell_password": {
+			"value": ""
+		},
+		"vayam-synapse-WorkspaceDefaultSqlServer_connectionString": {
+			"value": ""
+		},
+		"DansDell_properties_typeProperties_host": {
+			"value": "C:\\Users\\DanSchreck\\OneDrive - Vayam LLC\\_EnterpriseAnalytics\\HCM_Dashboard"
+		},
+		"DansDell_properties_typeProperties_userId": {
+			"value": "dan@vayam-llc.com"
+		},
+		"us-labor-force-statistics_sasUri": {
+			"value": ""
+		},
+		"vayam-synapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://vayam.dfs.core.windows.net"
+		}
+	}
+}
