@@ -1,4 +1,4 @@
 # azure-synapse
-Files in this repo
+# sample code
 
 Python and SQL code for data integration on Azure
